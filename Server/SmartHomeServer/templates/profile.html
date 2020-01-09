@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% load widget_tweaks %}
+{% load tag %}
+
+{% block title %}
+
+  {{ board.name }}
+
+{% endblock %}
+
+{% block breadcrumb %}
+
+  <li class="breadcrumb-item"><a href="{% url 'home' %}">Profiles</a></li>
+  <li class="breadcrumb-item active">{{ profile.name }}</li>
+
+{% endblock %}
+
+{% block content %}
+
+<style>
+    form {
+        margin-bottom: 25px;
+        }
+    .form-group {
+        max-width: 219px;
+        margin-right: 15px;
+        }
+    .row {
+        margin: 0;
+</style>
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    
+    <div class="row">
+    
+    {% for field in form %}
+        
+      {% if '|' in field.label %}
+        </div>
+        {% label_heading field.label as heading %}
+        <h3>{{ heading }}</h3>
+        <div class="row">
+      {% endif %}
+    
+      <div class="form-group">
+        
+        {% if '|' in field.label %}
+          {% label_without_heading field.label_tag as label_tag %}
+          {{ label_tag |safe }}
+        {% else %}
+          {{ field.label_tag }}
+        {% endif %}
+
+        {% if form.is_bound and field.errors %}
+          {% render_field field class="form-control is-invalid" %}
+          {% for error in field.errors %}
+            <div class="invalid-feedback">
+              {{ error }}
+            </div>
+          {% endfor %}
+        {% else %}
+          {% render_field field class="form-control" %}
+        {% endif %}
+
+      {% if field.help_text %}
+        <small class="form-text text-muted">
+          {{ field.help_text }}
+        </small>
+      {% endif %}
+      
+      </div>
+    {% endfor %}
+    
+    </div>
+    
+    <button type="submit" class="btn btn-success">Save</button>
+    <a class="btn btn-primary" role="button" href="{% url 'apply_profile' profile.pk %}">Apply</a>
+  </form>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block breadcrumb %}
+
+  <li class="breadcrumb-item active">Profiles</li>
+
+{% endblock %}
+
+{% block content %}
+
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th>Profile</th>
+        <th>Description</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for profile in profiles %}
+        <tr>
+          <td>
+            <a class="text text-primary" href="{% url 'edit_profile' profile.pk %}">{{ profile.name }}</a>
+          </td>
+          <td>{{ profile.description }}</td>
+          <td><a class="text text-primary" href="{% url 'apply_profile' profile.pk %}">Apply</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endblock %}
