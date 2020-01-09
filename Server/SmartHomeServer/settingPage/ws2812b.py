@@ -20,12 +20,12 @@ init_radio()
 def send_profile(profile):
 
     for code in profile.setting_codes().split(";"):
-            
+
+        if radio.failureDetected:
+            init_radio()
+            print('HARDWARE FAILURE')
+
         while send_code(code) == False:
-            if radio.failureDetected:
-                init_radio()
-                print('HARDWARE FAILURE')
-            
             print("Failed: ", code)
             time.sleep(0.1)
         print("Sent: ", code)
