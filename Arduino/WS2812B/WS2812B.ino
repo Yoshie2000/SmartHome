@@ -63,7 +63,7 @@ void setup() {
 
   FastLED.setBrightness(brightness);
 
-  radio = initRadio();
+  initRadio();
 }
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
@@ -75,14 +75,13 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 char receive_payload[17];
 
-RF24 initRadio() {
-  RF24 r = RF24(7, 8);
-  r.begin();
-  r.setRetries(5, 15);
-  r.openWritingPipe(pipes[1]);
-  r.openReadingPipe(1, pipes[0]);
-  r.startListening();
-  return r;
+void initRadio() {
+  radio.begin();
+  radio.setRetries(5, 15);
+  radio.openWritingPipe(pipes[1]);
+  radio.openReadingPipe(1, pipes[0]);
+  radio.startListening();
+  radio.failureDetected = 0;
 }
 
 void loop()
@@ -90,7 +89,7 @@ void loop()
   // Read the settings from the Raspberry
   //Serial.println("update");
   if (radio.failureDetected) {
-    radio = initRadio();
+    initRadio();
     Serial.println("Failure detected");
   }
 

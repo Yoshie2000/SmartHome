@@ -7,15 +7,15 @@ millis = lambda: int(round(time.time() * 1000))
 pipes = [0xF0E1, 0xF0D2]
 
 def init_radio():
-    r = RF24(22, 0)
-    r.begin()
-    r.enableDynamicPayloads()
+    radio.begin()
+    radio.enableDynamicPayloads()
     time.sleep(1)
-    r.openWritingPipe(pipes[0])
-    r.openReadingPipe(1,pipes[1])
-    return r
+    radio.openWritingPipe(pipes[0])
+    radio.openReadingPipe(1,pipes[1])
+    radio.failureDetected = 0
 
-radio = init_radio()
+radio = RF24(22, 0)
+init_radio()
 
 def send_profile(profile):
 
@@ -23,8 +23,8 @@ def send_profile(profile):
             
         while send_code(code) == False:
             if radio.failureDetected:
-                r = init_radio()
-                print('failure')
+                init_radio()
+                print('HARDWARE FAILURE')
             
             print("Failed: ", code)
             time.sleep(0.1)
