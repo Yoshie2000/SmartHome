@@ -6,21 +6,18 @@ payload_size = 16
 millis = lambda: int(round(time.time() * 1000))
 pipes = [0xF0E1, 0xF0D2]
 
-def init_radio():
-    r = RF24(22, 0)
-    r.begin()
-    r.enableDynamicPayloads()
-    time.sleep(0.5)
-    r.openWritingPipe(pipes[0])
-    r.openReadingPipe(1,pipes[1])
-    return r
+radio = RF24(22, 0)
+radio.begin()
+radio.enableDynamicPayloads()
+
+time.sleep(1)
+
+radio.openWritingPipe(pipes[0])
+radio.openReadingPipe(1,pipes[1])
 
 def send_profile(profile):
-
-    radio = init_radio()
-
     for code in profile.setting_codes().split(";"):
-        while send_code(radio, code) == False:
+        while send_code(code) == False:
             print("Failed: ", code)
             time.sleep(0.1)
         print("Sent: ", code)
@@ -28,7 +25,7 @@ def send_profile(profile):
         # cooldown
         time.sleep(0.3)
 
-def send_code(radio, code):
+def send_code(code):
     # The payload will always be the same, what will change is how much of it we send.
  
     # First, stop listening so we can talk.
