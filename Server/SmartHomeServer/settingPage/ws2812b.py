@@ -24,6 +24,13 @@ def send_profile(profile):
     for code in profile.setting_codes().split(";"):
             
         while send_code(code) == False:
+            if(radio.failureDetected){ 
+                radio.begin()
+                radio.failureDetected = 0
+                radio.openWritingPipe(pipes[0])
+                radio.openReadingPipe(1,pipes[1])
+                print('failure')
+            }
             print("Failed: ", code)
             time.sleep(0.1)
         print("Sent: ", code)

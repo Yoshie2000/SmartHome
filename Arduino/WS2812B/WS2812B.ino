@@ -51,13 +51,6 @@ uint8_t hueUpdateDelay = 10; // in ms
 uint8_t fps = 120;
 uint8_t brightness = 80;
 
-CRGBPalette16 colorPalettes[4] = {
-  RainbowColors_p,
-  RainbowStripeColors_p,
-  PartyColors_p,
-  HeatColors_p
-};
-
 // Adresses of the devices
 uint32_t pipes[2] = { 0xF0E1LL, 0xF0D2LL };
 
@@ -75,9 +68,6 @@ void setup() {
   radio.setRetries(5, 15);
   radio.setPALevel(RF24_PA_LOW); // Because this is a testing sketch
 
-  Serial.print("Listening on pipe: ");
-  Serial.println(pipes[0]);
-
   radio.openWritingPipe(pipes[1]); // Adress of the Raspberry
   radio.openReadingPipe(1, pipes[0]); // Adress of the Arduino
 
@@ -91,32 +81,52 @@ SimplePatternList gPatterns = { rainbow, rainbowWithGlitter, confetti, sinelon, 
 uint8_t gCurrentPatternNumber = 5; // Index number of which pattern is current
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
+char receive_payload[17];
+
 void loop()
 {
   // Read the settings from the Raspberry
+  //Serial.println("update");
+  if (radio.failureDetected) {
+    radio.begin();
+    radio.failureDetected = 0;
+    radio.openWritingPipe(pipes[1]);
+    radio.openReadingPipe(1, pipes[0]);
+    Serial.println("Failure detected");
+  }
+
   while (radio.available()) {
 
-    Serial.print("got sth: ");
-
-    char receive_payload[17];
-
+    Serial.println("radio available");
     uint8_t len = radio.getDynamicPayloadSize();
+    Serial.println(len);
 
     if (!len) {
+      Serial.println("!len");
+      radio.stopListening();
+      radio.startListening();
       continue;
     }
 
+    Serial.println("after if");
+
     radio.read(receive_payload, len);
+
+    Serial.println(receive_payload);
 
     receive_payload[len] = 0;
 
     Serial.println(receive_payload);
 
     radio.stopListening();
+    Serial.println("stopped");
     radio.write(receive_payload, len);
+    Serial.println("written");
     radio.startListening();
+    Serial.println("started");
 
     parsePayload(receive_payload);
+    Serial.println("parsed\n\n\n");
   }
 
   // Call the current pattern function once, updating the 'leds' array
@@ -127,13 +137,10 @@ void loop()
   // insert a delay to keep the framerate modest
   FastLED.delay(1000 / fps);
 
-  //Serial.println(gPatternNames[gCurrentPatternNumber]);
-
   // do some periodic updates
   EVERY_N_MILLISECONDS( hueUpdateDelay ) {
     gHue++;  // slowly cycle the "base color" through the rainbow
   }
-  //EVERY_N_SECONDS( 30 ) { nextPattern(); } // change patterns periodically
 }
 
 void parsePayload(const String& payload) {
@@ -200,6 +207,22 @@ void nextPattern()
   gCurrentPatternNumber = (gCurrentPatternNumber + 1) % ARRAY_SIZE(gPatterns);
 }
 
+CRGBPalette16 getColorPalette(int index) {
+  switch (index) {
+    case 0:
+      return RainbowColors_p;
+    case 1:
+      return RainbowStripeColors_p;
+    case 2:
+      return PartyColors_p;
+    case 3:
+      return HeatColors_p;
+    case 4:
+      return CloudColors_p;
+  }
+  return RainbowColors_p;
+}
+
 void rainbow()
 {
   // FastLED's built-in rainbow generator
@@ -260,7 +283,7 @@ void bpm()
 {
   // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
   uint8_t BeatsPerMinute = bpmBPM;
-  CRGBPalette16 palette = colorPalettes[bpmColorPaletteIndex];
+  CRGBPalette16 palette = getColorPalette(bpmColorPaletteIndex);
   uint8_t beat = beatsin16( BeatsPerMinute, 0, 255);
   for ( int i = 0; i < NUM_LEDS; i++) {
     leds[i] = ColorFromPalette(palette, gHue + (i * bpmHueOffset), beat - gHue + (i * bpmPartCount));
