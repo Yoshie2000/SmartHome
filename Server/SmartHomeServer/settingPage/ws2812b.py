@@ -13,6 +13,7 @@ def init_radio():
     time.sleep(0.5)
     r.openWritingPipe(pipes[0])
     r.openReadingPipe(1,pipes[1])
+    r.setPALevel(RF24.PA_MIN)
     return r
 
 def send_profile(profile):
@@ -20,11 +21,6 @@ def send_profile(profile):
     radio = init_radio()
 
     for code in profile.setting_codes().split(";"):
-
-        if radio.failureDetected:
-            radio = init_radio()
-            print('HARDWARE FAILURE')
-
         while send_code(radio, code) == False:
             print("Failed: ", code)
             time.sleep(0.1)

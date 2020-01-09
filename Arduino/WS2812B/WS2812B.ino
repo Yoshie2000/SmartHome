@@ -88,10 +88,6 @@ void loop()
 {
   // Read the settings from the Raspberry
   //Serial.println("update");
-  if (radio.failureDetected) {
-    initRadio();
-    Serial.println("Failure detected");
-  }
 
   while (radio.available()) {
 
