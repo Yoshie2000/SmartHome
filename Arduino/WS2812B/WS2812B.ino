@@ -63,15 +63,7 @@ void setup() {
 
   FastLED.setBrightness(brightness);
 
-  radio.begin();
-  radio.enableDynamicPayloads();
-  radio.setRetries(5, 15);
-  radio.setPALevel(RF24_PA_LOW); // Because this is a testing sketch
-
-  radio.openWritingPipe(pipes[1]); // Adress of the Raspberry
-  radio.openReadingPipe(1, pipes[0]); // Adress of the Arduino
-
-  radio.startListening();
+  radio = initRadio();
 }
 
 // List of patterns to cycle through.  Each is defined as a separate function below.
@@ -83,15 +75,22 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 char receive_payload[17];
 
+RF24 initRadio() {
+  RF24 r = RF24(7, 8);
+  r.begin();
+  r.setRetries(5, 15);
+  r.openWritingPipe(pipes[1]);
+  r.openReadingPipe(1, pipes[0]);
+  r.startListening();
+  return r;
+}
+
 void loop()
 {
   // Read the settings from the Raspberry
   //Serial.println("update");
   if (radio.failureDetected) {
-    radio.begin();
-    radio.failureDetected = 0;
-    radio.openWritingPipe(pipes[1]);
-    radio.openReadingPipe(1, pipes[0]);
+    radio = initRadio();
     Serial.println("Failure detected");
   }
 

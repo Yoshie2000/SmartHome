@@ -6,8 +6,6 @@ payload_size = 16
 millis = lambda: int(round(time.time() * 1000))
 pipes = [0xF0E1, 0xF0D2]
 
-r = init_radio()
-
 def init_radio():
     r = RF24(22, 0)
     r.begin()
@@ -16,6 +14,8 @@ def init_radio():
     r.openWritingPipe(pipes[0])
     r.openReadingPipe(1,pipes[1])
     return radio
+
+r = init_radio()
 
 def send_profile(profile):
 
