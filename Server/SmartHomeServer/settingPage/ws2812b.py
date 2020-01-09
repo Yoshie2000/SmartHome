@@ -1,22 +1,28 @@
 import time
 from RF24 import *
 import RPi.GPIO as GPIO
+
+# RPi Alternate, with SPIDEV - Note: Edit RF24/arch/BBB/spi.cpp and  set 'this->device = "/dev/spidev0.0";;' or as listed in /dev
+radio = RF24(22, 0)
  
 payload_size = 16
 millis = lambda: int(round(time.time() * 1000))
-pipes = [0xF0E1, 0xF0D2]
-
-radio = RF24(22, 0)
+ 
 radio.begin()
 radio.enableDynamicPayloads()
+radio.setRetries(5,15)
+
+pipes = [0xF0E1, 0xF0D2]
 
 time.sleep(1)
-
-radio.openWritingPipe(pipes[0])
-radio.openReadingPipe(1,pipes[1])
+ 
+radio.openWritingPipe(pipes[0]) # Address of the Arduino
+radio.openReadingPipe(1,pipes[1]) # Address of the Raspberry
 
 def send_profile(profile):
+
     for code in profile.setting_codes().split(";"):
+            
         while send_code(code) == False:
             print("Failed: ", code)
             time.sleep(0.1)
