@@ -13,7 +13,6 @@ def init_radio():
     time.sleep(0.5)
     r.openWritingPipe(pipes[0])
     r.openReadingPipe(1,pipes[1])
-    r.setPALevel(RF24.PA_MIN)
     return r
 
 def send_profile(profile):
