@@ -6,23 +6,30 @@ payload_size = 16
 millis = lambda: int(round(time.time() * 1000))
 pipes = [0xF0E1, 0xF0D2]
 
-def init_radio():
-    radio.begin()
-    radio.enableDynamicPayloads()
-    time.sleep(1)
-    radio.openWritingPipe(pipes[0])
-    radio.openReadingPipe(1,pipes[1])
-    radio.failureDetected = 0
-
 radio = RF24(22, 0)
-init_radio()
+
+radio.begin()
+radio.enableDynamicPayloads()
+
+time.sleep(0.5)
+
+radio.openWritingPipe(pipes[0])
+radio.openReadingPipe(1,pipes[1])
+radio.failureDetected = 0
 
 def send_profile(profile):
 
     for code in profile.setting_codes().split(";"):
 
         if radio.failureDetected:
-            init_radio()
+            radio.begin()
+            radio.enableDynamicPayloads()
+
+            time.sleep(0.5)
+
+            radio.openWritingPipe(pipes[0])
+            radio.openReadingPipe(1,pipes[1])
+            radio.failureDetected = 0
             print('HARDWARE FAILURE')
 
         while send_code(code) == False:
