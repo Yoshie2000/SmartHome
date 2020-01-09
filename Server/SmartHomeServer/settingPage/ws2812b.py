@@ -13,7 +13,7 @@ def init_radio():
     time.sleep(1)
     r.openWritingPipe(pipes[0])
     r.openReadingPipe(1,pipes[1])
-    return radio
+    return r
 
 radio = init_radio()
 
