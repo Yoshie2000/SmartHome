@@ -15,7 +15,7 @@ def init_radio():
     r.openReadingPipe(1,pipes[1])
     return radio
 
-r = init_radio()
+radio = init_radio()
 
 def send_profile(profile):
 
